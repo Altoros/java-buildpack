@@ -31,6 +31,7 @@ module JavaBuildpack
         @droplet.copy_resources
       end
 
+      # (see JavaBuildpack::Component::BaseComponent#release)
       def release
         credentials = @application.services.find_service(FILTER)['credentials']
 
@@ -83,13 +84,12 @@ module JavaBuildpack
       end
 
       def jar_path
-        qualify_path(@droplet.sandbox + 'jmxtrans-agent.jar', @droplet.root)
+        qualify_path(@droplet.sandbox + jar_name, @droplet.root)
       end
 
       def config_path
         qualify_path(@droplet.sandbox + 'jmxtrans-agent.xml', @droplet.root)
       end
-
     end
   end
 end
