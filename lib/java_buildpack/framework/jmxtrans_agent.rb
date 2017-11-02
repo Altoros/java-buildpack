@@ -14,65 +14,80 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'java_buildpack/component/base_component'
+require 'java_buildpack/component/versioned_dependency_component'
 require 'java_buildpack/framework'
-require 'erb'
-require 'ostruct'
+require 'java_buildpack/util/qualify_path'
 
 module JavaBuildpack
   module Framework
-    class JmxtransAgent < JavaBuildpack::Component::BaseComponent
+
+    # Encapsulates the functionality for enabling zero-touch Jmxtrans support.
+    class JmxtransAgent < JavaBuildpack::Component::VersionedDependencyComponent
       include JavaBuildpack::Util
 
-      VERSION = '1.2.4'
-
-      URL = 'https://github.com/jmxtrans/jmxtrans-agent/releases/download/' +
-            "jmxtrans-agent-#{VERSION}/jmxtrans-agent-#{VERSION}.jar"
-
-      JARNAME = 'jmxtrans-agent.jar'
-
-      PORT_KEY = 'port'
-      HOST_KEY = 'host'
-      ORG_SPACE_PREFIX = 'jmxtrans_prefix'
-
-      FILTER = /jmxtrans/
-
-      def detect
-        VERSION if @application.services.one_service?(FILTER)
-      end
-
+      # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
-        download_jar(VERSION, URL, JARNAME)
+        download_jar
         @droplet.copy_resources
       end
 
       def release
-        graphite_config = {}
-        java_opts = @droplet.java_opts
-        get_graphite_opts(graphite_config)
-        write_java_opts(java_opts, graphite_config)
-        @droplet.java_opts.add_preformatted_options("-javaagent:#{qualify_path(@droplet.sandbox + JARNAME, @droplet.root)}=#{qualify_path(@droplet.sandbox + 'jmxtrans-agent.xml', @droplet.root)}")
+        credentials = @application.services.find_service(FILTER)['credentials']
+
+        raise_if_credentials_missing(credentials)
+
+        graphite_host(credentials[HOST_KEY])
+        graphite_port(credentials[PORT_KEY])
+        graphite_prefix(credentials[PREFIX_KEY])
+
+        @droplet.java_opts.add_preformatted_options("-javaagent:#{jar_path}=#{config_path}")
+      end
+
+      protected
+
+      # (see JavaBuildpack::Component::VersionedDependencyComponent#supports?)
+      def supports?
+        @configuration['enabled'] && @application.services.one_service?(FILTER, HOST_KEY, PORT_KEY)
       end
 
       private
 
-      def get_graphite_opts(graphite_config)
-        if @application.services.one_service?(FILTER, [HOST_KEY, PORT_KEY, ORG_SPACE_PREFIX])
-          graphite_config['graphite.host'] = @application.services.find_service(FILTER)['credentials']['host']
-          graphite_config['graphite.port'] = @application.services.find_service(FILTER)['credentials']['port']
-          org_space_prefix = @application.services.find_service(FILTER)['credentials']['jmxtrans_prefix']
-        else
-          graphite_config['graphite.host'] = "localhost"
-          graphite_config['graphite.port'] = "2003"
-          org_space_prefix = "jmxtrans."
-        end
-        graphite_config['graphite.prefix'] = org_space_prefix + "#{@application.details['application_name']}.${CF_INSTANCE_INDEX}"
+      FILTER = /jmxtrans/
+
+      HOST_KEY = 'host'.freeze
+      PORT_KEY = 'port'.freeze
+      PREFIX_KEY = 'jmxtrans_prefix'.freeze
+
+      private_constant :FILTER, :HOST_KEY, :PORT_KEY, :PREFIX_KEY
+
+      def raise_if_credentials_missing(credentials)
+        missing_keys = [HOST_KEY, PORT_KEY, PREFIX_KEY].select { |key| credentials[key].nil? }.map { |key| "'#{key}'" }
+        raise "#{missing_keys.join(', ')} credentials must be set" unless missing_keys.empty?
       end
 
-      def write_java_opts(java_opts, grahite_config)
-        grahite_config.each do |key, value|
-          java_opts.add_system_property(key, value)
-        end
+      def graphite_host(host_value)
+        @droplet.java_opts.add_system_property('graphite.host', host_value)
+      end
+
+      def graphite_port(port_value)
+        @droplet.java_opts.add_system_property('graphite.port', port_value)
+      end
+
+      def graphite_prefix(prefix_value)
+        graphite_prefix = "#{prefix_value}#{app_name}.${CF_INSTANCE_INDEX}"
+        @droplet.java_opts.add_system_property('graphite.prefix', graphite_prefix)
+      end
+
+      def app_name
+        @application.details['application_name']
+      end
+
+      def jar_path
+        qualify_path(@droplet.sandbox + 'jmxtrans-agent.jar', @droplet.root)
+      end
+
+      def config_path
+        qualify_path(@droplet.sandbox + 'jmxtrans-agent.xml', @droplet.root)
       end
 
     end
