@@ -15,6 +15,6 @@
 
 # Configuration for the Jmxtrans framework
 ---
-version: 1.2.+
-repository_root: https://mvnrepository.com/artifact/org.jmxtrans.agent/jmxtrans-agent/
+version: 1.2.6
+repository_root: https://s3.amazonaws.com/altoros-java-buildpack/
 enabled: true
