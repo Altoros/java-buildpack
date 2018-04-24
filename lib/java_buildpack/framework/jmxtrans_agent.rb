@@ -40,6 +40,8 @@ module JavaBuildpack
         graphite_host(credentials[HOST_KEY])
         graphite_port(credentials[PORT_KEY])
         graphite_prefix(credentials[PREFIX_KEY])
+	
+        puts #{jar_path}
 
         @droplet.java_opts.add_preformatted_options("-javaagent:#{jar_path}=#{config_path}")
       end
