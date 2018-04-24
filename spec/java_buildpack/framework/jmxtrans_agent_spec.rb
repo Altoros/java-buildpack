@@ -55,7 +55,7 @@ describe JavaBuildpack::Framework::JmxtransAgent do
 
     it 'downloads Jmxtrans agent JAR', cache_fixture: 'stub-jmxtrans-agent.jar' do
       component.compile
-      expect(sandbox + "jmxtrans-agent-#{version}.jar").to exist
+      expect(sandbox + "jmxtrans_agent-#{version}.jar").to exist
     end
 
     it 'copies resources', cache_fixture: 'stub-jmxtrans-agent.jar' do
@@ -87,7 +87,7 @@ describe JavaBuildpack::Framework::JmxtransAgent do
             expect(java_opts).to include('-Dgraphite.port=0000')
             expect(java_opts).to include('-Dgraphite.prefix=test-prefix.test-application-name.${CF_INSTANCE_INDEX}')
             precompiled = '-javaagent:' \
-              "$PWD/.java-buildpack/jmxtrans_agent/jmxtrans-agent-#{version}.jar=" \
+              "$PWD/.java-buildpack/jmxtrans_agent/jmxtrans_agent-#{version}.jar=" \
               '$PWD/.java-buildpack/jmxtrans_agent/jmxtrans-agent.xml'
             expect(java_opts).to include(precompiled)
           end
