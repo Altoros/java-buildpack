@@ -36,6 +36,8 @@ module JavaBuildpack
 	puts @component_name
 	puts @droplet.component_id
         puts @droplet.root
+	Dir[@droplet.sandbox]
+	Dir[@droplet.root]
         @droplet.copy_resources
 
       end
