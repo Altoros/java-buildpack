@@ -34,6 +34,7 @@ module JavaBuildpack
 	puts @droplet.sandbox
 	puts jar_name
 	puts @component_name
+	puts @droplet.component_id
         @droplet.copy_resources
 
       end
@@ -90,9 +91,6 @@ module JavaBuildpack
         @application.details['application_name']
       end
 
-      def jar_name
-        'jmxtrans-agent-1.2.6.jar'     
-      end	
       def jar_path
         qualify_path(@droplet.sandbox + jar_name, @droplet.root)
       end
