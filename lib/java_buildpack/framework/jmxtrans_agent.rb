@@ -31,6 +31,7 @@ module JavaBuildpack
         download_jar
 	puts "Droplet"
 	puts @droplet
+	puts @droplet.sandbox
         @droplet.copy_resources
       end
 
