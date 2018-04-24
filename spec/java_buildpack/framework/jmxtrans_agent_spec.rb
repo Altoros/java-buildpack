@@ -55,7 +55,7 @@ describe JavaBuildpack::Framework::JmxtransAgent do
 
     it 'downloads Jmxtrans agent JAR', cache_fixture: 'stub-jmxtrans-agent.jar' do
       component.compile
-      expect(sandbox + "jmxtrans_agent-#{version}.jar").to exist
+      expect(sandbox + "jmxtrans-agent-#{version}.jar").to exist
     end
 
     it 'copies resources', cache_fixture: 'stub-jmxtrans-agent.jar' do
