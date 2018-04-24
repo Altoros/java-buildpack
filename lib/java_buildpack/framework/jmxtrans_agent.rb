@@ -91,7 +91,8 @@ module JavaBuildpack
       end
 
       def jar_name
-        'jmxtrans-agent-1.2.6.jar'      
+        'jmxtrans-agent-1.2.6.jar'     
+      end	
       def jar_path
         qualify_path(@droplet.sandbox + jar_name, @droplet.root)
       end
