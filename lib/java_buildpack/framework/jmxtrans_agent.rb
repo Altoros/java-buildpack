@@ -29,11 +29,14 @@ module JavaBuildpack
       def compile
 	puts "Downloading jar"      
         download_jar
+	puts "Droplet"
+	puts @droplet
         @droplet.copy_resources
       end
 
       # (see JavaBuildpack::Component::BaseComponent#release)
       def release
+	puts "Release"      
         credentials = @application.services.find_service(FILTER)['credentials']
 
         raise_if_credentials_missing(credentials)
@@ -42,8 +45,6 @@ module JavaBuildpack
         graphite_port(credentials[PORT_KEY])
         graphite_prefix(credentials[PREFIX_KEY])
 	
-        puts #{jar_path}
-
         @droplet.java_opts.add_preformatted_options("-javaagent:#{jar_path}=#{config_path}")
       end
 
