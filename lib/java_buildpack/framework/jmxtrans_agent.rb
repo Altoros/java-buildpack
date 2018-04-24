@@ -40,7 +40,6 @@ module JavaBuildpack
 
       # (see JavaBuildpack::Component::BaseComponent#release)
       def release
-	puts "Release"      
         credentials = @application.services.find_service(FILTER)['credentials']
 
         raise_if_credentials_missing(credentials)
@@ -91,6 +90,8 @@ module JavaBuildpack
         @application.details['application_name']
       end
 
+      def jar_name
+        'jmxtrans-agent-1.2.6.jar'      
       def jar_path
         qualify_path(@droplet.sandbox + jar_name, @droplet.root)
       end
