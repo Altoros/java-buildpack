@@ -33,6 +33,7 @@ module JavaBuildpack
 	puts @droplet
 	puts @droplet.sandbox
 	puts jar_name
+	puts @component_name
         @droplet.copy_resources
 
       end
