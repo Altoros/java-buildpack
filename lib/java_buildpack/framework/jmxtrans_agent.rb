@@ -27,6 +27,7 @@ module JavaBuildpack
 
       # (see JavaBuildpack::Component::BaseComponent#compile)
       def compile
+	puts "Downloading jar"      
         download_jar
         @droplet.copy_resources
       end
